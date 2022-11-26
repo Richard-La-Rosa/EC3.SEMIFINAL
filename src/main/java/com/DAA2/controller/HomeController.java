@@ -1,6 +1,7 @@
 package com.DAA2.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,8 @@ import com.DAA2.model.DetalleOrden;
 import com.DAA2.model.Orden;
 import com.DAA2.model.Producto;
 import com.DAA2.model.Usuario;
+import com.DAA2.service.IDetallerOrdenService;
+import com.DAA2.service.IOrdenService;
 import com.DAA2.service.IUsuarioService;
 import com.DAA2.service.ProductoService;
 
@@ -35,6 +38,14 @@ public class HomeController {
 	
 	@Autowired
 	private IUsuarioService usuarioService;
+	
+	@Autowired
+	private IOrdenService ordenService;
+
+	
+	@Autowired
+	private IDetallerOrdenService detalleOrdenService;
+	
 	
 	List<DetalleOrden> detalles = new ArrayList<DetalleOrden>();
 	
@@ -140,6 +151,31 @@ public class HomeController {
 		model.addAttribute("orden",orden);
 		model.addAttribute("usuario",usuario);
 		return "usuario/resumenorden";
+	}
+	
+	@GetMapping("/saveOrder")
+	public String saveOrder() {
+		Date fechaCreacion = new Date();
+		orden.setFechaCreacion(fechaCreacion);
+		orden.setNumero(ordenService.generarNumeroOrden());
+		
+		//usuario
+		Usuario usuario = usuarioService.findById(1).get();
+		
+		orden.setUsuario(usuario);
+		ordenService.save(orden);
+		
+		//guardar detalles
+		for (DetalleOrden dt:detalles) {
+			dt.setOrden(orden);
+			detalleOrdenService.save(dt);
+		}
+		//limpiar lista y orden
+		orden = new Orden();
+		detalles.clear();
+		
+		
+		return "redirect:/";
 	}
 
 }
