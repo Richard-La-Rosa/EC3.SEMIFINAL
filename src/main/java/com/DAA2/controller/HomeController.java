@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.websocket.server.PathParam;
 
@@ -26,6 +27,8 @@ import com.DAA2.service.IDetallerOrdenService;
 import com.DAA2.service.IOrdenService;
 import com.DAA2.service.IUsuarioService;
 import com.DAA2.service.ProductoService;
+
+import aj.org.objectweb.asm.Attribute;
 
 @Controller
 @RequestMapping("/")
@@ -153,6 +156,7 @@ public class HomeController {
 		return "usuario/resumenorden";
 	}
 	
+	//guardar la orden
 	@GetMapping("/saveOrder")
 	public String saveOrder() {
 		Date fechaCreacion = new Date();
@@ -176,6 +180,15 @@ public class HomeController {
 		
 		
 		return "redirect:/";
+	}
+	
+	@PostMapping("/search")
+	public String searchProduct(@RequestParam String nombre, Model model ) {
+		log.info("Nombre del producto: {}", nombre);
+	    List<Producto> productos= productoService.findAll().stream().filter(p -> p.getNombre().contains(nombre)).collect(Collectors.toList());		
+		model.addAttribute("productos",productos);
+	    
+	    return "usuario/home";	
 	}
 
 }
